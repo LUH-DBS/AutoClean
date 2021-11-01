@@ -13,6 +13,7 @@ class Config:
 
     @staticmethod
     def get(key):
+        print('dict length: ' + str(len(Config.config)))
         return Config.config[key].status
 
     @staticmethod
