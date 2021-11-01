@@ -8,25 +8,11 @@ from ..base import AutoSklearnClassificationAlgorithm, find_components, \
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import CategoricalHyperparameter
 
-from autosklearn.flexible.Config import Config
 
 classifier_directory = os.path.split(__file__)[0]
 _classifiers = find_components(__package__,
                                classifier_directory,
                                AutoSklearnClassificationAlgorithm)
-
-
-remove_keys = []
-for k, v in _classifiers.items():
-    if not Config.get(k):
-        remove_keys.append(k)
-
-#default value
-if len(remove_keys) == len(_classifiers):
-    remove_keys.remove('random_forest')
-
-for k in remove_keys:
-    del _classifiers[k]
 
 
 _addons = ThirdPartyComponents(AutoSklearnClassificationAlgorithm)
@@ -40,6 +26,7 @@ class ClassifierChoice(AutoSklearnChoice):
 
     @classmethod
     def get_components(cls):
+
         components = OrderedDict()
         components.update(_classifiers)
         components.update(_addons.components)
@@ -120,6 +107,9 @@ class ClassifierChoice(AutoSklearnChoice):
                         continue
                     default = default_
                     break
+
+
+        #print('classifiers: ' + str(list(available_estimators.keys())))
 
         estimator = CategoricalHyperparameter('__choice__',
                                               list(available_estimators.keys()),

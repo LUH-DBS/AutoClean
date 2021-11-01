@@ -23,18 +23,6 @@ _rescalers = find_components(__package__,
                              AutoSklearnPreprocessingAlgorithm)
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
 
-remove_keys = []
-for k, v in _rescalers.items():
-    if not Config.get(k):
-        remove_keys.append(k)
-
-#default value
-if len(remove_keys) == len(_rescalers):
-    remove_keys.remove('none')
-
-for k in remove_keys:
-    del _rescalers[k]
-
 
 def add_rescaler(rescaler: Rescaling) -> None:
     _addons.add_component(rescaler)

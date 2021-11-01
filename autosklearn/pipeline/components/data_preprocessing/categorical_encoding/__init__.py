@@ -13,25 +13,12 @@ from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
     ThirdPartyComponents, AutoSklearnChoice
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
-from autosklearn.flexible.Config import Config
 
 ohe_directory = os.path.split(__file__)[0]
 _ohes = find_components(__package__,
                         ohe_directory,
                         AutoSklearnPreprocessingAlgorithm)
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
-
-remove_keys = []
-for k, v in _ohes.items():
-    if not Config.get(k):
-        remove_keys.append(k)
-
-#default value
-if len(remove_keys) == len(_ohes):
-    remove_keys.remove('one_hot_encoding')
-
-for k in remove_keys:
-    del _ohes[k]
 
 
 def add_ohe(ohe: 'OHEChoice') -> None:
