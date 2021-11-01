@@ -7,6 +7,7 @@ from autosklearn.pipeline.components.base import (
 )
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
 
+from autosklearn.flexible.Config import Config
 
 class GaussianNB(AutoSklearnClassificationAlgorithm):
 

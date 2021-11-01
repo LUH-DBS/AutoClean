@@ -10,6 +10,7 @@ import autosklearn.pipeline.implementations.MinorityCoalescer
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
+from autosklearn.flexible.Config import Config
 
 
 class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
@@ -56,8 +57,9 @@ class MinorityCoalescer(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                                         ) -> ConfigurationSpace:
+        my_name = 'MinorityCoalescer_'
         cs = ConfigurationSpace()
-        minimum_fraction = UniformFloatHyperparameter(
-            "minimum_fraction", lower=.0001, upper=0.5, default_value=0.01, log=True)
+        minimum_fraction = Config.get_value(my_name, UniformFloatHyperparameter(
+            "minimum_fraction", lower=.0001, upper=0.5, default_value=0.01, log=True))
         cs.add_hyperparameter(minimum_fraction)
         return cs

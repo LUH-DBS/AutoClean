@@ -9,6 +9,7 @@ from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 from autosklearn.util.common import check_for_bool, check_none
 
+from autosklearn.flexible.Config import Config
 
 class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
@@ -91,16 +92,18 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        penalty = CategoricalHyperparameter(
-            "penalty", ["l1", "l2"], default_value="l2")
-        loss = CategoricalHyperparameter(
-            "loss", ["hinge", "squared_hinge"], default_value="squared_hinge")
+        my_name = 'LinearSVC_'
+
+        penalty = Config.get_value(my_name, CategoricalHyperparameter(
+            "penalty", ["l1", "l2"], default_value="l2"))
+        loss = Config.get_value(my_name, CategoricalHyperparameter(
+            "loss", ["hinge", "squared_hinge"], default_value="squared_hinge"))
         dual = Constant("dual", "False")
         # This is set ad-hoc
-        tol = UniformFloatHyperparameter(
-            "tol", 1e-5, 1e-1, default_value=1e-4, log=True)
-        C = UniformFloatHyperparameter(
-            "C", 0.03125, 32768, log=True, default_value=1.0)
+        tol = Config.get_value(my_name, UniformFloatHyperparameter(
+            "tol", 1e-5, 1e-1, default_value=1e-4, log=True))
+        C = Config.get_value(my_name, UniformFloatHyperparameter(
+            "C", 0.03125, 32768, log=True, default_value=1.0))
         multi_class = Constant("multi_class", "ovr")
         # These are set ad-hoc
         fit_intercept = Constant("fit_intercept", "True")
@@ -108,20 +111,25 @@ class LibLinear_SVC(AutoSklearnClassificationAlgorithm):
         cs.add_hyperparameters([penalty, loss, dual, tol, C, multi_class,
                                 fit_intercept, intercept_scaling])
 
-        penalty_and_loss = ForbiddenAndConjunction(
-            ForbiddenEqualsClause(penalty, "l1"),
-            ForbiddenEqualsClause(loss, "hinge")
-        )
-        constant_penalty_and_loss = ForbiddenAndConjunction(
-            ForbiddenEqualsClause(dual, "False"),
-            ForbiddenEqualsClause(penalty, "l2"),
-            ForbiddenEqualsClause(loss, "hinge")
-        )
-        penalty_and_dual = ForbiddenAndConjunction(
-            ForbiddenEqualsClause(dual, "False"),
-            ForbiddenEqualsClause(penalty, "l1")
-        )
-        cs.add_forbidden_clause(penalty_and_loss)
-        cs.add_forbidden_clause(constant_penalty_and_loss)
-        cs.add_forbidden_clause(penalty_and_dual)
+        if Config.check_value("l1", penalty) and Config.check_value("hinge",loss):
+            penalty_and_loss = ForbiddenAndConjunction(
+                ForbiddenEqualsClause(penalty, "l1"),
+                ForbiddenEqualsClause(loss, "hinge")
+            )
+            cs.add_forbidden_clause(penalty_and_loss)
+
+        if Config.check_value('False', dual) and Config.check_value("l2", penalty) and Config.check_value("hinge", loss):
+            constant_penalty_and_loss = ForbiddenAndConjunction(
+                ForbiddenEqualsClause(dual, "False"),
+                ForbiddenEqualsClause(penalty, "l2"),
+                ForbiddenEqualsClause(loss, "hinge")
+            )
+            cs.add_forbidden_clause(constant_penalty_and_loss)
+
+        if Config.check_value('False', dual) and Config.check_value("l1", penalty):
+            penalty_and_dual = ForbiddenAndConjunction(
+                ForbiddenEqualsClause(dual, "False"),
+                ForbiddenEqualsClause(penalty, "l1")
+            )
+            cs.add_forbidden_clause(penalty_and_dual)
         return cs

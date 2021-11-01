@@ -21,8 +21,8 @@ class Densifier(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_properties(dataset_properties=None):
-        return {'shortname': 'RandomTreesEmbedding',
-                'name': 'Random Trees Embedding',
+        return {'shortname': 'Densifier',
+                'name': 'Densifier Embedding',
                 'handles_regression': True,
                 'handles_classification': True,
                 'handles_multiclass': True,

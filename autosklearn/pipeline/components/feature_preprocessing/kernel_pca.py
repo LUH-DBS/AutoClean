@@ -10,6 +10,7 @@ from ConfigSpace.conditions import EqualsCondition, InCondition
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA
+from autosklearn.flexible.Config import Config
 
 
 class KernelPCA(AutoSklearnPreprocessingAlgorithm):
@@ -74,22 +75,32 @@ class KernelPCA(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        n_components = UniformIntegerHyperparameter(
-            "n_components", 10, 2000, default_value=100)
-        kernel = CategoricalHyperparameter('kernel', ['poly', 'rbf', 'sigmoid', 'cosine'], 'rbf')
-        gamma = UniformFloatHyperparameter(
+
+        my_name = 'KernelPCA_'
+
+        n_components = Config.get_value(my_name, UniformIntegerHyperparameter(
+            "n_components", 10, 2000, default_value=100))
+        kernel = Config.get_value(my_name, CategoricalHyperparameter('kernel', ['poly', 'rbf', 'sigmoid', 'cosine'], 'rbf'))
+        gamma = Config.get_value(my_name, UniformFloatHyperparameter(
             "gamma",
             3.0517578125e-05, 8,
             log=True,
             default_value=0.01,
-        )
-        degree = UniformIntegerHyperparameter('degree', 2, 5, 3)
-        coef0 = UniformFloatHyperparameter("coef0", -1, 1, default_value=0)
+        ))
+        degree = Config.get_value(my_name, UniformIntegerHyperparameter('degree', 2, 5, 3))
+        coef0 = Config.get_value(my_name, UniformFloatHyperparameter("coef0", -1, 1, default_value=0))
         cs = ConfigurationSpace()
         cs.add_hyperparameters([n_components, kernel, degree, gamma, coef0])
 
-        degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
-        coef0_condition = InCondition(coef0, kernel, ["poly", "sigmoid"])
-        gamma_condition = InCondition(gamma, kernel, ["poly", "rbf"])
-        cs.add_conditions([degree_depends_on_poly, coef0_condition, gamma_condition])
+        if Config.check_value("poly", kernel):
+            degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
+            cs.add_condition(degree_depends_on_poly)
+
+        if Config.check_value("poly", kernel) and Config.check_value("sigmoid", kernel):
+            coef0_condition = InCondition(coef0, kernel, ["poly", "sigmoid"])
+            cs.add_condition(coef0_condition)
+
+        if Config.check_value("poly", kernel) and Config.check_value("rbf", kernel):
+            gamma_condition = InCondition(gamma, kernel, ["poly", "rbf"])
+            cs.add_condition(gamma_condition)
         return cs

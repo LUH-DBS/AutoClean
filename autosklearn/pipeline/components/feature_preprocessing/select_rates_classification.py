@@ -7,7 +7,7 @@ from functools import partial
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import SIGNED_DATA, UNSIGNED_DATA, SPARSE, DENSE, INPUT
-
+from autosklearn.flexible.Config import Config
 
 class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, alpha, mode='fpr',
@@ -103,20 +103,21 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        alpha = UniformFloatHyperparameter(
-            name="alpha", lower=0.01, upper=0.5, default_value=0.1)
+        my_name = 'SelectClassificationRates_'
+
+        alpha = Config.get_value(my_name, UniformFloatHyperparameter(name="alpha", lower=0.01, upper=0.5, default_value=0.1))
 
         if dataset_properties is not None and dataset_properties.get('sparse'):
             choices = ['chi2', 'mutual_info_classif']
         else:
             choices = ['chi2', 'f_classif', 'mutual_info_classif']
 
-        score_func = CategoricalHyperparameter(
+        score_func = Config.get_value(my_name, CategoricalHyperparameter(
             name="score_func",
             choices=choices,
-            default_value="chi2")
+            default_value="chi2"))
 
-        mode = CategoricalHyperparameter('mode', ['fpr', 'fdr', 'fwe'], 'fpr')
+        mode = Config.get_value(my_name, CategoricalHyperparameter('mode', ['fpr', 'fdr', 'fwe'], 'fpr'))
 
         cs = ConfigurationSpace()
         cs.add_hyperparameter(alpha)
@@ -125,7 +126,8 @@ class SelectClassificationRates(AutoSklearnPreprocessingAlgorithm):
 
         # mutual_info_classif constantly crashes if mode is not percentile
         # as a WA, fix the mode for this score
-        cond = NotEqualsCondition(mode, score_func, 'mutual_info_classif')
-        cs.add_condition(cond)
+        if Config.check_value('mutual_info_classif', score_func):
+            cond = NotEqualsCondition(mode, score_func, 'mutual_info_classif')
+            cs.add_condition(cond)
 
         return cs

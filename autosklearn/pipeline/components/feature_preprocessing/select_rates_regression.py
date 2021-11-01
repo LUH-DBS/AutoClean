@@ -7,7 +7,7 @@ from functools import partial
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import UNSIGNED_DATA, SPARSE, DENSE, INPUT
-
+from autosklearn.flexible.Config import Config
 
 class SelectRegressionRates(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, alpha, mode='percentile',

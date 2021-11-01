@@ -11,6 +11,7 @@ from ...base import AutoSklearnPreprocessingAlgorithm, find_components, \
     ThirdPartyComponents, AutoSklearnChoice
 
 from sklearn.base import BaseEstimator
+from autosklearn.flexible.Config import Config
 
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 
@@ -18,6 +19,18 @@ mc_directory = os.path.split(__file__)[0]
 _mcs = find_components(
     __package__, mc_directory, AutoSklearnPreprocessingAlgorithm)
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+
+remove_keys = []
+for k, v in _mcs.items():
+    if not Config.get(k):
+        remove_keys.append(k)
+
+#default value
+if len(remove_keys) == len(_mcs):
+    remove_keys.remove('no_coalescense')
+
+for k in remove_keys:
+    del _mcs[k]
 
 
 def add_mc(mc: BaseEstimator) -> None:

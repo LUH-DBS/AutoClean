@@ -328,8 +328,8 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
             max_models_on_disc=max_models_on_disc,
             seed=seed,
             memory_limit=memory_limit,
-            include=include,
-            exclude=None,
+            #include=include,
+            #exclude=None,
             resampling_strategy=None,
             resampling_strategy_arguments=None,
             tmp_folder=tmp_folder,
@@ -370,7 +370,7 @@ class AutoSklearn2Classifier(AutoSklearnClassifier):
                 'gradient_boosting',
                 'mlp',
             ]
-        self.include['classifier'] = include_estimators
+        #self.include['classifier'] = include_estimators
 
         if self.metric is None:
             if len(y.shape) == 1 or y.shape[1] == 1:

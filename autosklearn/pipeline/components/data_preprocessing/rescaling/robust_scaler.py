@@ -14,7 +14,7 @@ from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_resca
     import Rescaling
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
-
+from autosklearn.flexible.Config import Config
 
 class RobustScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
     def __init__(
@@ -51,13 +51,15 @@ class RobustScalerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                                         ) -> ConfigurationSpace:
+        my_name = 'RobustScalerComponent_'
+
         cs = ConfigurationSpace()
-        q_min = UniformFloatHyperparameter(
+        q_min = Config.get_value(my_name, UniformFloatHyperparameter(
             'q_min', 0.001, 0.3, default_value=0.25
-        )
-        q_max = UniformFloatHyperparameter(
+        ))
+        q_max = Config.get_value(my_name, UniformFloatHyperparameter(
             'q_max', 0.7, 0.999, default_value=0.75
-        )
+        ))
         cs.add_hyperparameters((q_min, q_max))
         return cs
 

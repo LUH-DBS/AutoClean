@@ -12,6 +12,7 @@ from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, PREDICT
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.util.common import check_for_bool
 
+from autosklearn.flexible.Config import Config
 
 class PassiveAggressive(
     IterativeComponentWithSampleWeight,
@@ -146,17 +147,20 @@ class PassiveAggressive(
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        C = UniformFloatHyperparameter("C", 1e-5, 10, 1.0, log=True)
-        fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
-        loss = CategoricalHyperparameter(
-            "loss", ["hinge", "squared_hinge"], default_value="hinge"
-        )
 
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4,
-                                         log=True)
+        my_name = 'PassiveAggressive_'
+
+        C = Config.get_value(my_name, UniformFloatHyperparameter("C", 1e-5, 10, 1.0, log=True))
+        fit_intercept = UnParametrizedHyperparameter("fit_intercept", "True")
+        loss = Config.get_value(my_name, CategoricalHyperparameter(
+            "loss", ["hinge", "squared_hinge"], default_value="hinge"
+        ))
+
+        tol = Config.get_value(my_name, UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4,
+                                         log=True))
         # Note: Average could also be an Integer if > 1
-        average = CategoricalHyperparameter('average', ['False', 'True'],
-                                            default_value='False')
+        average = Config.get_value(my_name, CategoricalHyperparameter('average', ['False', 'True'],
+                                            default_value='False'))
 
         cs = ConfigurationSpace()
         cs.add_hyperparameters([loss, fit_intercept, tol, C, average])

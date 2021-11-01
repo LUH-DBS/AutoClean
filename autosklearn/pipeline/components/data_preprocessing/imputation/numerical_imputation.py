@@ -8,7 +8,7 @@ import numpy as np
 from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTYPE
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
-
+from autosklearn.flexible.Config import Config
 
 class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
 
@@ -60,9 +60,10 @@ class NumericalImputation(AutoSklearnPreprocessingAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                                         ) -> ConfigurationSpace:
+        my_name = 'NumericalImputation_'
         # TODO add replace by zero!
-        strategy = CategoricalHyperparameter(
-            "strategy", ["mean", "median", "most_frequent"], default_value="mean")
+        strategy = Config.get_value(my_name, CategoricalHyperparameter(
+            "strategy", ["mean", "median", "most_frequent"], default_value="mean"))
         cs = ConfigurationSpace()
         cs.add_hyperparameter(strategy)
         return cs

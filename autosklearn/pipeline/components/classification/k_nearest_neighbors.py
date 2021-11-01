@@ -4,6 +4,7 @@ from ConfigSpace.hyperparameters import CategoricalHyperparameter, UniformIntege
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 
+from autosklearn.flexible.Config import Config
 
 class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
 
@@ -57,11 +58,13 @@ class KNearestNeighborsClassifier(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        n_neighbors = UniformIntegerHyperparameter(
-            name="n_neighbors", lower=1, upper=100, log=True, default_value=1)
-        weights = CategoricalHyperparameter(
-            name="weights", choices=["uniform", "distance"], default_value="uniform")
-        p = CategoricalHyperparameter(name="p", choices=[1, 2], default_value=2)
+        my_name = 'KNeighborsClassifier_'
+
+        n_neighbors = Config.get_value(my_name, UniformIntegerHyperparameter(
+            name="n_neighbors", lower=1, upper=100, log=True, default_value=1))
+        weights = Config.get_value(my_name, CategoricalHyperparameter(
+            name="weights", choices=["uniform", "distance"], default_value="uniform"))
+        p = Config.get_value(my_name, CategoricalHyperparameter(name="p", choices=[1, 2], default_value=2))
         cs.add_hyperparameters([n_neighbors, weights, p])
 
         return cs

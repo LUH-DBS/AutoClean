@@ -8,6 +8,8 @@ from autosklearn.pipeline.components.base import \
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 from autosklearn.util.common import check_for_bool, check_none
 
+from autosklearn.flexible.Config import Config
+
 
 class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
 
@@ -107,26 +109,28 @@ class ExtraTreesPreprocessorClassification(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
+        my_name = 'ExtraTreesPreprocessorClassification_'
+
         n_estimators = Constant("n_estimators", 100)
-        criterion = CategoricalHyperparameter(
-            "criterion", ["gini", "entropy"], default_value="gini")
-        max_features = UniformFloatHyperparameter("max_features", 0, 1,
-                                                  default_value=0.5)
+        criterion = Config.get_value(my_name, CategoricalHyperparameter(
+            "criterion", ["gini", "entropy"], default_value="gini"))
+        max_features = Config.get_value(my_name, UniformFloatHyperparameter("max_features", 0, 1,
+                                                  default_value=0.5))
 
         max_depth = UnParametrizedHyperparameter(name="max_depth", value="None")
         max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")
 
-        min_samples_split = UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default_value=2)
-        min_samples_leaf = UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default_value=1)
+        min_samples_split = Config.get_value(my_name, UniformIntegerHyperparameter(
+            "min_samples_split", 2, 20, default_value=2))
+        min_samples_leaf = Config.get_value(my_name, UniformIntegerHyperparameter(
+            "min_samples_leaf", 1, 20, default_value=1))
         min_weight_fraction_leaf = UnParametrizedHyperparameter(
             'min_weight_fraction_leaf', 0.)
         min_impurity_decrease = UnParametrizedHyperparameter(
             'min_impurity_decrease', 0.)
 
-        bootstrap = CategoricalHyperparameter(
-            "bootstrap", ["True", "False"], default_value="False")
+        bootstrap = Config.get_value(my_name, CategoricalHyperparameter(
+            "bootstrap", ["True", "False"], default_value="False"))
 
         cs.add_hyperparameters([n_estimators, criterion, max_features,
                                 max_depth, max_leaf_nodes, min_samples_split,

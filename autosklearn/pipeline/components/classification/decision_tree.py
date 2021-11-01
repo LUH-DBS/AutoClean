@@ -11,6 +11,7 @@ from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SP
 from autosklearn.pipeline.implementations.util import convert_multioutput_multiclass_to_multilabel
 from autosklearn.util.common import check_none
 
+from autosklearn.flexible.Config import Config
 
 class DecisionTree(AutoSklearnClassificationAlgorithm):
     def __init__(self, criterion, max_features, max_depth_factor,
@@ -93,14 +94,16 @@ class DecisionTree(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        criterion = CategoricalHyperparameter(
-            "criterion", ["gini", "entropy"], default_value="gini")
-        max_depth_factor = UniformFloatHyperparameter(
-            'max_depth_factor', 0., 2., default_value=0.5)
-        min_samples_split = UniformIntegerHyperparameter(
-            "min_samples_split", 2, 20, default_value=2)
-        min_samples_leaf = UniformIntegerHyperparameter(
-            "min_samples_leaf", 1, 20, default_value=1)
+        my_name = 'DecisionTreeClassifier_'
+
+        criterion = Config.get_value(my_name, CategoricalHyperparameter(
+            "criterion", ["gini", "entropy"], default_value="gini"))
+        max_depth_factor = Config.get_value(my_name, UniformFloatHyperparameter(
+            'max_depth_factor', 0., 2., default_value=0.5))
+        min_samples_split = Config.get_value(my_name, UniformIntegerHyperparameter(
+            "min_samples_split", 2, 20, default_value=2))
+        min_samples_leaf = Config.get_value(my_name, UniformIntegerHyperparameter(
+            "min_samples_leaf", 1, 20, default_value=1))
         min_weight_fraction_leaf = Constant("min_weight_fraction_leaf", 0.0)
         max_features = UnParametrizedHyperparameter('max_features', 1.0)
         max_leaf_nodes = UnParametrizedHyperparameter("max_leaf_nodes", "None")

@@ -8,6 +8,7 @@ from autosklearn.pipeline.implementations.util import softmax
 
 import numpy as np
 
+from autosklearn.flexible.Config import Config
 
 class QDA(AutoSklearnClassificationAlgorithm):
 
@@ -71,8 +72,11 @@ class QDA(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        reg_param = UniformFloatHyperparameter('reg_param', 0.0, 1.0,
-                                               default_value=0.0)
+
+        my_name = 'QuadraticDiscriminantAnalysis_'
+
+        reg_param = Config.get_value(my_name, UniformFloatHyperparameter('reg_param', 0.0, 1.0,
+                                               default_value=0.0))
         cs = ConfigurationSpace()
         cs.add_hyperparameter(reg_param)
         return cs

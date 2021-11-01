@@ -3,7 +3,7 @@ from ConfigSpace.hyperparameters import UniformIntegerHyperparameter
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import SPARSE, UNSIGNED_DATA, DENSE, INPUT
-
+from autosklearn.flexible.Config import Config
 
 class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, target_dim, random_state=None):
@@ -46,8 +46,10 @@ class TruncatedSVD(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        target_dim = UniformIntegerHyperparameter(
-            "target_dim", 10, 256, default_value=128)
+        my_name = 'TruncatedSVD_'
+
+        target_dim = Config.get_value(my_name, UniformIntegerHyperparameter(
+            "target_dim", 10, 256, default_value=128))
         cs = ConfigurationSpace()
         cs.add_hyperparameter(target_dim)
         return cs

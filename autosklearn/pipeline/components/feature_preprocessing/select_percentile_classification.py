@@ -1,3 +1,5 @@
+from autosklearn.flexible.Config import Config
+
 from ConfigSpace.configuration_space import ConfigurationSpace
 from ConfigSpace.hyperparameters import \
     UniformFloatHyperparameter, CategoricalHyperparameter, Constant
@@ -95,14 +97,16 @@ class SelectPercentileClassification(SelectPercentileBase,
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        percentile = UniformFloatHyperparameter(
-            name="percentile", lower=1, upper=99, default_value=50)
+        my_name = 'SelectPercentileClassification_'
 
-        score_func = CategoricalHyperparameter(
+        percentile = Config.get_value(my_name, UniformFloatHyperparameter(
+            name="percentile", lower=1, upper=99, default_value=50))
+
+        score_func = Config.get_value(my_name, CategoricalHyperparameter(
             name="score_func",
             choices=["chi2", "f_classif", "mutual_info"],
             default_value="chi2"
-        )
+        ))
         if dataset_properties is not None:
             # Chi2 can handle sparse data, so we respect this
             if 'sparse' in dataset_properties and dataset_properties['sparse']:

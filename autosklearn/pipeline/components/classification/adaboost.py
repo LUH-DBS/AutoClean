@@ -5,6 +5,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import AutoSklearnClassificationAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SPARSE
 
+from autosklearn.flexible.Config import Config
 
 class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
 
@@ -66,14 +67,15 @@ class AdaboostClassifier(AutoSklearnClassificationAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        n_estimators = UniformIntegerHyperparameter(
-            name="n_estimators", lower=50, upper=500, default_value=50, log=False)
-        learning_rate = UniformFloatHyperparameter(
-            name="learning_rate", lower=0.01, upper=2, default_value=0.1, log=True)
-        algorithm = CategoricalHyperparameter(
-            name="algorithm", choices=["SAMME.R", "SAMME"], default_value="SAMME.R")
-        max_depth = UniformIntegerHyperparameter(
-            name="max_depth", lower=1, upper=10, default_value=1, log=False)
+        my_name = 'AdaBoostClassifier_'
+        n_estimators = Config.get_value(my_name, UniformIntegerHyperparameter(
+            name="n_estimators", lower=50, upper=500, default_value=50, log=False))
+        learning_rate = Config.get_value(my_name, UniformFloatHyperparameter(
+            name="learning_rate", lower=0.01, upper=2, default_value=0.1, log=True))
+        algorithm = Config.get_value(my_name, CategoricalHyperparameter(
+            name="algorithm", choices=["SAMME.R", "SAMME"], default_value="SAMME.R"))
+        max_depth = Config.get_value(my_name, UniformIntegerHyperparameter(
+            name="max_depth", lower=1, upper=10, default_value=1, log=False))
 
         cs.add_hyperparameters([n_estimators, learning_rate, algorithm, max_depth])
         return cs

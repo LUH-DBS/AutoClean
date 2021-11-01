@@ -5,7 +5,7 @@ from ConfigSpace.hyperparameters import UniformIntegerHyperparameter, \
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, SIGNED_DATA
 from autosklearn.util.common import check_none, check_for_bool
-
+from autosklearn.flexible.Config import Config
 
 class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
 
@@ -80,22 +80,24 @@ class RandomTreesEmbedding(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        n_estimators = UniformIntegerHyperparameter(name="n_estimators",
+        my_name = 'RandomTreesEmbedding_'
+
+        n_estimators = Config.get_value(my_name, UniformIntegerHyperparameter(name="n_estimators",
                                                     lower=10, upper=100,
-                                                    default_value=10)
-        max_depth = UniformIntegerHyperparameter(name="max_depth",
+                                                    default_value=10))
+        max_depth = Config.get_value(my_name, UniformIntegerHyperparameter(name="max_depth",
                                                  lower=2, upper=10,
-                                                 default_value=5)
-        min_samples_split = UniformIntegerHyperparameter(name="min_samples_split",
+                                                 default_value=5))
+        min_samples_split = Config.get_value(my_name, UniformIntegerHyperparameter(name="min_samples_split",
                                                          lower=2, upper=20,
-                                                         default_value=2)
-        min_samples_leaf = UniformIntegerHyperparameter(name="min_samples_leaf",
+                                                         default_value=2))
+        min_samples_leaf = Config.get_value(my_name, UniformIntegerHyperparameter(name="min_samples_leaf",
                                                         lower=1, upper=20,
-                                                        default_value=1)
+                                                        default_value=1))
         min_weight_fraction_leaf = Constant('min_weight_fraction_leaf', 1.0)
         max_leaf_nodes = UnParametrizedHyperparameter(name="max_leaf_nodes",
                                                       value="None")
-        bootstrap = CategoricalHyperparameter('bootstrap', ['True', 'False'])
+        bootstrap = Config.get_value(my_name, CategoricalHyperparameter('bootstrap', ['True', 'False']))
         cs = ConfigurationSpace()
         cs.add_hyperparameters([n_estimators, max_depth, min_samples_split,
                                 min_samples_leaf, min_weight_fraction_leaf,

@@ -10,6 +10,8 @@ from autosklearn.pipeline.components.base import \
 from autosklearn.pipeline.constants import INPUT, UNSIGNED_DATA, DENSE
 from autosklearn.util.common import check_for_bool, check_none
 
+from autosklearn.flexible.Config import Config
+
 
 class FastICA(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, algorithm, whiten, fun, n_components=None,
@@ -68,12 +70,15 @@ class FastICA(AutoSklearnPreprocessingAlgorithm):
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
 
-        n_components = UniformIntegerHyperparameter("n_components", 10, 2000, default_value=100)
-        algorithm = CategoricalHyperparameter('algorithm', ['parallel', 'deflation'], 'parallel')
-        whiten = CategoricalHyperparameter('whiten', ['False', 'True'], 'False')
-        fun = CategoricalHyperparameter('fun', ['logcosh', 'exp', 'cube'], 'logcosh')
+        my_name = 'FastICA_'
+
+        n_components = Config.get_value(my_name, UniformIntegerHyperparameter("n_components", 10, 2000, default_value=100))
+        algorithm = Config.get_value(my_name, CategoricalHyperparameter('algorithm', ['parallel', 'deflation'], 'parallel'))
+        whiten = Config.get_value(my_name, CategoricalHyperparameter('whiten', ['False', 'True'], 'False'))
+        fun = Config.get_value(my_name, CategoricalHyperparameter('fun', ['logcosh', 'exp', 'cube'], 'logcosh'))
         cs.add_hyperparameters([n_components, algorithm, whiten, fun])
 
-        cs.add_condition(EqualsCondition(n_components, whiten, "True"))
+        if Config.check_value("True", whiten):
+            cs.add_condition(EqualsCondition(n_components, whiten, "True"))
 
         return cs

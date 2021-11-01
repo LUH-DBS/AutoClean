@@ -8,6 +8,7 @@ from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.util.common import check_none
 
+from autosklearn.flexible.Config import Config
 
 class LDA(AutoSklearnClassificationAlgorithm):
     def __init__(self, shrinkage, tol, shrinkage_factor=0.5,
@@ -74,12 +75,16 @@ class LDA(AutoSklearnClassificationAlgorithm):
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
         cs = ConfigurationSpace()
-        shrinkage = CategoricalHyperparameter(
-            "shrinkage", ["None", "auto", "manual"], default_value="None")
-        shrinkage_factor = UniformFloatHyperparameter(
-            "shrinkage_factor", 0., 1., 0.5)
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4, log=True)
+
+        my_name = 'LinearDiscriminantAnalysisClassifier_'
+
+        shrinkage = Config.get_value(my_name, CategoricalHyperparameter(
+            "shrinkage", ["None", "auto", "manual"], default_value="None"))
+        shrinkage_factor = Config.get_value(my_name, UniformFloatHyperparameter(
+            "shrinkage_factor", 0., 1., 0.5))
+        tol = Config.get_value(my_name, UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4, log=True))
         cs.add_hyperparameters([shrinkage, shrinkage_factor, tol])
 
-        cs.add_condition(EqualsCondition(shrinkage_factor, shrinkage, "manual"))
+        if Config.check_value("manual", shrinkage):
+            cs.add_condition(EqualsCondition(shrinkage_factor, shrinkage, "manual"))
         return cs

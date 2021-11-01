@@ -12,6 +12,7 @@ from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_resca
     import Rescaling
 from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
+from autosklearn.flexible.Config import Config
 
 
 class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm):
@@ -52,13 +53,15 @@ class QuantileTransformerComponent(Rescaling, AutoSklearnPreprocessingAlgorithm)
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties: Optional[DATASET_PROPERTIES_TYPE] = None
                                         ) -> ConfigurationSpace:
+        my_name = 'QuantileTransformerComponent_'
+
         cs = ConfigurationSpace()
         # TODO parametrize like the Random Forest as n_quantiles = n_features^param
-        n_quantiles = UniformIntegerHyperparameter(
+        n_quantiles = Config.get_value(my_name, UniformIntegerHyperparameter(
             'n_quantiles', lower=10, upper=2000, default_value=1000
-        )
-        output_distribution = CategoricalHyperparameter(
-            'output_distribution', ['uniform', 'normal']
-        )
+        ))
+        output_distribution = Config.get_value(my_name, CategoricalHyperparameter(
+            'output_distribution', ['uniform', 'normal'], default_value='uniform'
+        ))
         cs.add_hyperparameters((n_quantiles, output_distribution))
         return cs

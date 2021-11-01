@@ -14,6 +14,7 @@ from autosklearn.pipeline.components.base import (
 from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, PREDICTIONS
 from autosklearn.util.common import check_for_bool
 
+from autosklearn.flexible.Config import Config
 
 class MLPClassifier(
     IterativeComponent,
@@ -181,24 +182,27 @@ class MLPClassifier(
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        cs = ConfigurationSpace()
-        hidden_layer_depth = UniformIntegerHyperparameter(name="hidden_layer_depth",
-                                                          lower=1, upper=3, default_value=1)
-        num_nodes_per_layer = UniformIntegerHyperparameter(name="num_nodes_per_layer",
-                                                           lower=16, upper=264, default_value=32,
-                                                           log=True)
-        activation = CategoricalHyperparameter(name="activation", choices=['tanh', 'relu'],
-                                               default_value='relu')
-        alpha = UniformFloatHyperparameter(name="alpha", lower=1e-7, upper=1e-1, default_value=1e-4,
-                                           log=True)
 
-        learning_rate_init = UniformFloatHyperparameter(name="learning_rate_init",
+        my_name = 'MLPClassifier_'
+
+        cs = ConfigurationSpace()
+        hidden_layer_depth = Config.get_value(my_name, UniformIntegerHyperparameter(name="hidden_layer_depth",
+                                                          lower=1, upper=3, default_value=1))
+        num_nodes_per_layer = Config.get_value(my_name, UniformIntegerHyperparameter(name="num_nodes_per_layer",
+                                                           lower=16, upper=264, default_value=32,
+                                                           log=True))
+        activation = Config.get_value(my_name, CategoricalHyperparameter(name="activation", choices=['tanh', 'relu'],
+                                               default_value='relu'))
+        alpha = Config.get_value(my_name, UniformFloatHyperparameter(name="alpha", lower=1e-7, upper=1e-1, default_value=1e-4,
+                                           log=True))
+
+        learning_rate_init = Config.get_value(my_name, UniformFloatHyperparameter(name="learning_rate_init",
                                                         lower=1e-4, upper=0.5, default_value=1e-3,
-                                                        log=True)
+                                                        log=True))
         # Not allowing to turn off early stopping
-        early_stopping = CategoricalHyperparameter(name="early_stopping",
+        early_stopping = Config.get_value(my_name, CategoricalHyperparameter(name="early_stopping",
                                                    choices=["valid", "train"],  # , "off"],
-                                                   default_value="valid")
+                                                   default_value="valid"))
         # Constants
         n_iter_no_change = Constant(name="n_iter_no_change", value=32)  # default=10 is too low
         validation_fraction = Constant(name="validation_fraction", value=0.1)
@@ -228,8 +232,9 @@ class MLPClassifier(
                                 solver, batch_size, shuffle,
                                 beta_1, beta_2, epsilon])
 
-        validation_fraction_cond = InCondition(validation_fraction, early_stopping, ["valid"])
-        cs.add_conditions([validation_fraction_cond])
+        if Config.check_value("valid", early_stopping):
+            validation_fraction_cond = InCondition(validation_fraction, early_stopping, ["valid"])
+            cs.add_conditions([validation_fraction_cond])
         # We always use early stopping
         # n_iter_no_change_cond = InCondition(n_iter_no_change, early_stopping, ["valid", "train"])
         # tol_cond = InCondition(n_iter_no_change, early_stopping, ["valid", "train"])

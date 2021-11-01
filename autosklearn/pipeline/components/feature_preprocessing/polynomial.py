@@ -6,7 +6,7 @@ from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, SPARSE, UNSIGNED_DATA, INPUT
 from autosklearn.util.common import check_for_bool
-
+from autosklearn.flexible.Config import Config
 
 class PolynomialFeatures(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, degree, interaction_only, include_bias, random_state=None):
@@ -50,12 +50,14 @@ class PolynomialFeatures(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
+        my_name = 'PolynomialFeatures_'
+
         # More than degree 3 is too expensive!
-        degree = UniformIntegerHyperparameter("degree", 2, 3, 2)
-        interaction_only = CategoricalHyperparameter("interaction_only",
-                                                     ["False", "True"], "False")
-        include_bias = CategoricalHyperparameter("include_bias",
-                                                 ["True", "False"], "True")
+        degree = Config.get_value(my_name, UniformIntegerHyperparameter("degree", 2, 3, 2))
+        interaction_only = Config.get_value(my_name, CategoricalHyperparameter("interaction_only",
+                                                     ["False", "True"], "False"))
+        include_bias = Config.get_value(my_name, CategoricalHyperparameter("include_bias",
+                                                 ["True", "False"], "True"))
 
         cs = ConfigurationSpace()
         cs.add_hyperparameters([degree, interaction_only, include_bias])

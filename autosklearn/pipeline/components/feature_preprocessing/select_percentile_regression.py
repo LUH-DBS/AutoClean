@@ -7,6 +7,7 @@ from autosklearn.pipeline.components.feature_preprocessing.select_percentile imp
     SelectPercentileBase
 from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
 
+from autosklearn.flexible.Config import Config
 
 class SelectPercentileRegression(SelectPercentileBase,
                                  AutoSklearnPreprocessingAlgorithm):

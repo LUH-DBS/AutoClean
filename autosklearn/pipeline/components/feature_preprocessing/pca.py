@@ -7,7 +7,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA
 from autosklearn.util.common import check_for_bool
-
+from autosklearn.flexible.Config import Config
 
 class PCA(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, keep_variance, whiten, random_state=None):
@@ -52,10 +52,12 @@ class PCA(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        keep_variance = UniformFloatHyperparameter(
-            "keep_variance", 0.5, 0.9999, default_value=0.9999)
-        whiten = CategoricalHyperparameter(
-            "whiten", ["False", "True"], default_value="False")
+        my_name = 'PCA_'
+
+        keep_variance = Config.get_value(my_name, UniformFloatHyperparameter(
+            "keep_variance", 0.5, 0.9999, default_value=0.9999))
+        whiten = Config.get_value(my_name, CategoricalHyperparameter(
+            "whiten", ["False", "True"], default_value="False"))
         cs = ConfigurationSpace()
         cs.add_hyperparameters([keep_variance, whiten])
         return cs

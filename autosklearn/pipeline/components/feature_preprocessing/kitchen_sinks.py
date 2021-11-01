@@ -4,6 +4,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
+from autosklearn.flexible.Config import Config
 
 
 class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
@@ -51,10 +52,12 @@ class RandomKitchenSinks(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        gamma = UniformFloatHyperparameter(
-            "gamma", 3.0517578125e-05, 8, default_value=1.0, log=True)
-        n_components = UniformIntegerHyperparameter(
-            "n_components", 50, 10000, default_value=100, log=True)
+        my_name = 'RBFSampler_'
+
+        gamma = Config.get_value(my_name, UniformFloatHyperparameter(
+            "gamma", 3.0517578125e-05, 8, default_value=1.0, log=True))
+        n_components = Config.get_value(my_name, UniformIntegerHyperparameter(
+            "n_components", 50, 10000, default_value=100, log=True))
         cs = ConfigurationSpace()
         cs.add_hyperparameters([gamma, n_components])
         return cs

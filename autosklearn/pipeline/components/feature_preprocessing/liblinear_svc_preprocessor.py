@@ -7,7 +7,7 @@ from ConfigSpace.forbidden import ForbiddenEqualsClause, \
 from autosklearn.pipeline.components.base import AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import SPARSE, DENSE, UNSIGNED_DATA, INPUT
 from autosklearn.util.common import check_for_bool, check_none
-
+from autosklearn.flexible.Config import Config
 
 class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
     # Liblinear is not deterministic as it uses a RNG inside
@@ -76,15 +76,17 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
+        my_name = 'LibLinear_Preprocessor_'
+
         cs = ConfigurationSpace()
 
         penalty = Constant("penalty", "l1")
-        loss = CategoricalHyperparameter(
-            "loss", ["hinge", "squared_hinge"], default_value="squared_hinge")
+        loss = Config.get_value(my_name, CategoricalHyperparameter(
+            "loss", ["hinge", "squared_hinge"], default_value="squared_hinge"))
         dual = Constant("dual", "False")
         # This is set ad-hoc
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4, log=True)
-        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True, default_value=1.0)
+        tol = Config.get_value(my_name, UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-4, log=True))
+        C = Config.get_value(my_name, UniformFloatHyperparameter("C", 0.03125, 32768, log=True, default_value=1.0))
         multi_class = Constant("multi_class", "ovr")
         # These are set ad-hoc
         fit_intercept = Constant("fit_intercept", "True")
@@ -93,9 +95,10 @@ class LibLinear_Preprocessor(AutoSklearnPreprocessingAlgorithm):
         cs.add_hyperparameters([penalty, loss, dual, tol, C, multi_class,
                                 fit_intercept, intercept_scaling])
 
-        penalty_and_loss = ForbiddenAndConjunction(
-            ForbiddenEqualsClause(penalty, "l1"),
-            ForbiddenEqualsClause(loss, "hinge")
-        )
-        cs.add_forbidden_clause(penalty_and_loss)
+        if Config.check_value("l1", penalty) and Config.check_value("hinge", loss):
+            penalty_and_loss = ForbiddenAndConjunction(
+                ForbiddenEqualsClause(penalty, "l1"),
+                ForbiddenEqualsClause(loss, "hinge")
+            )
+            cs.add_forbidden_clause(penalty_and_loss)
         return cs

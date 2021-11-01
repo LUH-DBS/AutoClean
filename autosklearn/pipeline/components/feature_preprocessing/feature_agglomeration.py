@@ -10,6 +10,7 @@ from autosklearn.pipeline.components.base import \
     AutoSklearnPreprocessingAlgorithm
 from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, INPUT
 
+from autosklearn.flexible.Config import Config
 
 class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
     def __init__(self, n_clusters, affinity, linkage, pooling_func,
@@ -59,19 +60,23 @@ class FeatureAgglomeration(AutoSklearnPreprocessingAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
+
+        my_name = 'FeatureAgglomeration_'
+
         cs = ConfigurationSpace()
-        n_clusters = UniformIntegerHyperparameter("n_clusters", 2, 400, 25)
-        affinity = CategoricalHyperparameter(
-            "affinity", ["euclidean", "manhattan", "cosine"], "euclidean")
-        linkage = CategoricalHyperparameter(
-            "linkage", ["ward", "complete", "average"], "ward")
-        pooling_func = CategoricalHyperparameter(
-            "pooling_func", ["mean", "median", "max"])
+        n_clusters = Config.get_value(my_name, UniformIntegerHyperparameter("n_clusters", 2, 400, 25))
+        affinity = Config.get_value(my_name, CategoricalHyperparameter(
+            "affinity", ["euclidean", "manhattan", "cosine"], "euclidean"))
+        linkage = Config.get_value(my_name, CategoricalHyperparameter(
+            "linkage", ["ward", "complete", "average"], "ward"))
+        pooling_func = Config.get_value(my_name, CategoricalHyperparameter(
+            "pooling_func", ["mean", "median", "max"]))
 
         cs.add_hyperparameters([n_clusters, affinity, linkage, pooling_func])
 
-        affinity_and_linkage = ForbiddenAndConjunction(
-            ForbiddenInClause(affinity, ["manhattan", "cosine"]),
-            ForbiddenEqualsClause(linkage, "ward"))
-        cs.add_forbidden_clause(affinity_and_linkage)
+        if Config.check_value("manhattan", affinity) and Config.check_value("cosine", affinity) and Config.check_value("ward", linkage):
+            affinity_and_linkage = ForbiddenAndConjunction(
+                ForbiddenInClause(affinity, ["manhattan", "cosine"]),
+                ForbiddenEqualsClause(linkage, "ward"))
+            cs.add_forbidden_clause(affinity_and_linkage)
         return cs

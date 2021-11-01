@@ -12,6 +12,7 @@ from autosklearn.pipeline.constants import DENSE, UNSIGNED_DATA, PREDICTIONS, SP
 from autosklearn.pipeline.implementations.util import softmax
 from autosklearn.util.common import check_for_bool, check_none
 
+from autosklearn.flexible.Config import Config
 
 class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
     def __init__(self, C, kernel, gamma, shrinking, tol, max_iter,
@@ -122,22 +123,25 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
 
     @staticmethod
     def get_hyperparameter_search_space(dataset_properties=None):
-        C = UniformFloatHyperparameter("C", 0.03125, 32768, log=True,
-                                       default_value=1.0)
+
+        my_name = 'SVC_'
+
+        C = Config.get_value(my_name, UniformFloatHyperparameter("C", 0.03125, 32768, log=True,
+                                       default_value=1.0))
         # No linear kernel here, because we have liblinear
-        kernel = CategoricalHyperparameter(name="kernel",
+        kernel = Config.get_value(my_name, CategoricalHyperparameter(name="kernel",
                                            choices=["rbf", "poly", "sigmoid"],
-                                           default_value="rbf")
-        degree = UniformIntegerHyperparameter("degree", 2, 5, default_value=3)
-        gamma = UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
-                                           log=True, default_value=0.1)
+                                           default_value="rbf"))
+        degree = Config.get_value(my_name, UniformIntegerHyperparameter("degree", 2, 5, default_value=3))
+        gamma = Config.get_value(my_name, UniformFloatHyperparameter("gamma", 3.0517578125e-05, 8,
+                                           log=True, default_value=0.1))
         # TODO this is totally ad-hoc
-        coef0 = UniformFloatHyperparameter("coef0", -1, 1, default_value=0)
+        coef0 = Config.get_value(my_name, UniformFloatHyperparameter("coef0", -1, 1, default_value=0))
         # probability is no hyperparameter, but an argument to the SVM algo
-        shrinking = CategoricalHyperparameter("shrinking", ["True", "False"],
-                                              default_value="True")
-        tol = UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-3,
-                                         log=True)
+        shrinking = Config.get_value(my_name, CategoricalHyperparameter("shrinking", ["True", "False"],
+                                              default_value="True"))
+        tol = Config.get_value(my_name, UniformFloatHyperparameter("tol", 1e-5, 1e-1, default_value=1e-3,
+                                         log=True))
         # cache size is not a hyperparameter, but an argument to the program!
         max_iter = UnParametrizedHyperparameter("max_iter", -1)
 
@@ -145,9 +149,12 @@ class LibSVM_SVC(AutoSklearnClassificationAlgorithm):
         cs.add_hyperparameters([C, kernel, degree, gamma, coef0, shrinking,
                                 tol, max_iter])
 
-        degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
-        coef0_condition = InCondition(coef0, kernel, ["poly", "sigmoid"])
-        cs.add_condition(degree_depends_on_poly)
-        cs.add_condition(coef0_condition)
+        if Config.check_value("poly", kernel):
+            degree_depends_on_poly = EqualsCondition(degree, kernel, "poly")
+            cs.add_condition(degree_depends_on_poly)
+
+        if Config.check_value("poly", kernel) and Config.check_value("sigmoid", kernel):
+            coef0_condition = InCondition(coef0, kernel, ["poly", "sigmoid"])
+            cs.add_condition(coef0_condition)
 
         return cs

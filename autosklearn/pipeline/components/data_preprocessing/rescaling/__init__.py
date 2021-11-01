@@ -14,12 +14,26 @@ from autosklearn.pipeline.base import DATASET_PROPERTIES_TYPE, PIPELINE_DATA_DTY
 from autosklearn.pipeline.components.data_preprocessing.rescaling.abstract_rescaling import (
     Rescaling
 )
+from autosklearn.flexible.Config import Config
+
 
 rescaling_directory = os.path.split(__file__)[0]
 _rescalers = find_components(__package__,
                              rescaling_directory,
                              AutoSklearnPreprocessingAlgorithm)
 _addons = ThirdPartyComponents(AutoSklearnPreprocessingAlgorithm)
+
+remove_keys = []
+for k, v in _rescalers.items():
+    if not Config.get(k):
+        remove_keys.append(k)
+
+#default value
+if len(remove_keys) == len(_rescalers):
+    remove_keys.remove('none')
+
+for k in remove_keys:
+    del _rescalers[k]
 
 
 def add_rescaler(rescaler: Rescaling) -> None:
