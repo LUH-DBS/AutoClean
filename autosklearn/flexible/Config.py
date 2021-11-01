@@ -9,7 +9,7 @@ from ConfigSpace.hyperparameters import UniformFloatHyperparameter, \
 
 
 class Config:
-    config = pickle.load(open('/tmp/space.p', 'rb')) #dict()
+    config = dict()#pickle.load(open('/tmp/space.p', 'rb')) #dict()
 
     @staticmethod
     def get(key):
