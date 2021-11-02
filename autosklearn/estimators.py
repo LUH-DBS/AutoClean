@@ -241,9 +241,6 @@ class AutoSklearnEstimator(BaseEstimator):
 
         """  # noqa (links are too long)
         # Raise error if the given total time budget is less than 30 seconds.
-        if time_left_for_this_task < 30:
-            raise ValueError("Time left for this task must be at least "
-                             "30 seconds. ")
         self.time_left_for_this_task = time_left_for_this_task
         self.per_run_time_limit = per_run_time_limit
         self.initial_configurations_via_metalearning = initial_configurations_via_metalearning
