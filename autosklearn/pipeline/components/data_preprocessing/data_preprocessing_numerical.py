@@ -4,6 +4,10 @@ from ConfigSpace.configuration_space import ConfigurationSpace
 
 from autosklearn.pipeline.components.data_preprocessing import rescaling as \
     rescaling_components
+
+from autosklearn.pipeline.components.data_preprocessing import outlier_detection as \
+    outlier_detection_components
+
 from autosklearn.pipeline.components.data_preprocessing.imputation.numerical_imputation \
     import NumericalImputation
 from autosklearn.pipeline.components.data_preprocessing.variance_threshold\
@@ -95,6 +99,7 @@ class NumericalPreprocessingPipeline(BasePipeline):
         default_dataset_props = {'target_type': 'classification'}
 
         steps.extend([
+            ["outlier_detection", outlier_detection_components.OutlierDetectionChoice(default_dataset_props)],
             ["imputation", NumericalImputation()],
             ["variance_threshold", VarianceThreshold()],
             ["rescaling", rescaling_components.RescalingChoice(default_dataset_props)],
